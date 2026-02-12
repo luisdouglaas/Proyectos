@@ -1,0 +1,1214 @@
+
+R.RTRASNP.1#show run
+Building configuration...
+
+Current configuration : 10917 bytes
+!
+! Last configuration change at 18:20:32 MEX Mon Feb 9 2026
+!
+version 17.6
+service timestamps debug datetime msec
+service timestamps log datetime msec
+platform issu reload interface-module sequence 0 1 2 3 4 5
+no platform punt-keepalive disable-kernel-core
+platform bfd-debug-trace 1
+platform xconnect load-balance-hash-algo mac-ip-instanceid
+platform tcam-parity-error enable
+platform tcam-threshold alarm-frequency 1
+!
+hostname R.RTRASNP.1
+!
+boot-start-marker
+boot system flash:asr900rsp2-universalk9_npe.17.06.06.SPA.bin
+boot-end-marker
+!
+!
+vrf definition 300
+ rd 65001:300
+ !
+ address-family ipv4
+  route-target export 65001:300
+  route-target import 65001:300
+ exit-address-family
+!
+vrf definition 310
+ rd 65001:310
+ !
+ address-family ipv4
+  route-target export 65001:310
+  route-target import 65001:310
+ exit-address-family
+!
+vrf definition 320
+ rd 65001:320
+ !
+ address-family ipv4
+  route-target export 65001:320
+  route-target import 65001:320
+ exit-address-family
+!
+vrf definition 330
+ rd 65001:330
+ !
+ address-family ipv4
+  route-target export 65001:330
+  route-target import 65001:330
+ exit-address-family
+!
+vrf definition 340
+ rd 65001:340
+ !
+ address-family ipv4
+  route-target export 65001:340
+  route-target import 65001:340
+ exit-address-family
+!
+vrf definition 350
+ rd 65001:350
+ !
+ address-family ipv4
+  route-target export 65001:350
+  route-target import 65001:350
+ exit-address-family
+!
+vrf definition 360
+ rd 65001:360
+ !
+ address-family ipv4
+  route-target export 65001:360
+  route-target import 65001:360
+ exit-address-family
+!
+vrf definition 430
+ rd 65001:430
+ !
+ address-family ipv4
+  route-target export 65001:430
+  route-target import 65001:430
+ exit-address-family
+!
+vrf definition 930
+ rd 65001:930
+ !
+ address-family ipv4
+  route-target export 65001:930
+  route-target import 65001:930
+ exit-address-family
+!
+vrf definition 960
+ rd 65001:960
+ !
+ address-family ipv4
+  route-target export 65001:960
+  route-target import 65001:960
+ exit-address-family
+!
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+no logging console
+enable secret 9 $9$YGjUk75w1aHgKU$2olq32cZb1kW3zeEfFJZTZ1rLKjquxf3WcubLsZuD0Y
+!
+no aaa new-model
+clock timezone MEX -6 0
+!
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name cfe.grtne
+ip dhcp excluded-address vrf 330 10.23.196.1 10.23.196.49
+ip dhcp excluded-address vrf 330 10.23.196.60 10.23.196.63
+!
+ip dhcp pool POOL_AP_VLAN330
+ vrf 330
+ network 10.23.196.0 255.255.255.192
+ default-router 10.23.196.62
+ dns-server 8.8.8.8
+ lease 0 12
+!
+!
+!
+login on-success log
+!
+!
+!
+!
+!
+!
+!
+mpls label protocol ldp
+mpls ldp graceful-restart
+mpls ldp discovery targeted-hello accept
+multilink bundle-name authenticated
+!
+!
+!
+license udi pid ASR-903 sn FOX2417P5J4
+license boot level metroaggrservices
+no license smart enable
+memory free low-watermark processor 5050
+!
+!
+spanning-tree extend system-id
+sdm prefer default
+diagnostic bootup level minimal
+!
+username cfe_op privilege 15 secret 9 $9$AgTQ4mNR6Csh/.$5yVjAqOKvr25ytRKkDl3YCdZ.ty1ZLyMRxY.QnG51co
+!
+redundancy
+ mode sso
+ main-cpu
+  standby console enable
+!
+!
+controller wanphy 0/0/8
+!
+controller wanphy 0/1/8
+!
+!
+transceiver type all
+ monitoring
+cdp run
+!
+!
+!
+class-map match-any af41
+ match vlan  340
+class-map match-any ef
+ match vlan  320
+ match vlan  360
+class-map match-any cs1
+ match vlan  350
+class-map match-any cs2
+ match vlan  430
+ match vlan  930
+class-map match-any cs3
+ match vlan  310
+class-map match-any cs6
+ match vlan  300
+class-map match-any control-traffic
+ match mpls experimental topmost 6
+ match dscp cs6
+ match precedence 6
+class-map match-any video-traffic
+ match mpls experimental topmost 4
+ match dscp af41
+ match precedence 4
+class-map match-any voice-traffic
+ match mpls experimental topmost 5
+ match dscp ef
+ match precedence 5
+class-map match-any medicion-traffic
+ match mpls experimental topmost 1
+ match dscp cs1  af11  af12
+ match precedence 1
+class-map match-any pmu-scada-traffic
+ match mpls experimental topmost 3
+ match mpls experimental topmost 2
+ match dscp cs3  af31  af32
+ match dscp cs2  af21  af22
+!
+policy-map CE-policy-CFE
+ class voice-traffic
+  priority level 1 percent 15
+ class control-traffic
+  bandwidth percent 5
+ class video-traffic
+  bandwidth percent 15
+ class medicion-traffic
+  bandwidth percent 15
+ class pmu-scada-traffic
+  priority level 2 percent 20
+  set mpls experimental topmost 3
+ class class-default
+policy-map core-policy-CFE
+ class voice-traffic
+  priority level 1 percent 15
+  set mpls experimental topmost 5
+ class control-traffic
+  bandwidth percent 5
+  set mpls experimental topmost 6
+ class video-traffic
+  bandwidth percent 15
+  set mpls experimental topmost 4
+ class pmu-scada-traffic
+  priority level 2 percent 20
+  set mpls experimental topmost 3
+ class medicion-traffic
+  bandwidth percent 15
+  set mpls experimental topmost 1
+ class class-default
+  set mpls experimental topmost 0
+policy-map tag-traffic-CFE
+ class ef
+  set dscp ef
+  set mpls experimental imposition 5
+ class af41
+  set dscp af41
+  set mpls experimental imposition 4
+ class cs3
+  set dscp cs3
+  set mpls experimental imposition 3
+ class cs2
+  set dscp cs2
+  set mpls experimental imposition 2
+ class cs1
+  set dscp cs1
+  set mpls experimental imposition 1
+ class class-default
+  set dscp default
+  set mpls experimental imposition 0
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ description GESTION - VRF300
+ ip address 23.0.2.11 255.255.255.255
+!
+interface Loopback1
+ description GESTION SECUNDARIO - VRF300
+ vrf forwarding 300
+ ip address 23.1.2.11 255.255.255.255
+!
+interface GigabitEthernet0/0/0
+ description TRONCAL MULTISERVICIOS
+ no ip address
+ negotiation auto
+ service instance 320 ethernet
+  encapsulation dot1q 320
+  rewrite ingress tag pop 1 symmetric
+  bridge-domain 320
+ !
+ service instance 330 ethernet
+  encapsulation dot1q 330
+  rewrite ingress tag pop 1 symmetric
+  bridge-domain 330
+ !
+ service instance 360 ethernet
+  encapsulation dot1q 360
+  rewrite ingress tag pop 1 symmetric
+  bridge-domain 360
+ !
+ service instance 430 ethernet
+  encapsulation dot1q 430
+  rewrite ingress tag pop 1 symmetric
+  bridge-domain 430
+ !
+ service instance 930 ethernet
+  encapsulation dot1q 930
+  rewrite ingress tag pop 1 symmetric
+  bridge-domain 930
+ !
+ service instance 960 ethernet
+  encapsulation dot1q 960
+  rewrite ingress tag pop 1 symmetric
+  bridge-domain 960
+ !
+!
+interface GigabitEthernet0/0/1
+ description Conexion a SW2.RACC.1
+ no ip address
+ negotiation auto
+ service instance 330 ethernet
+  encapsulation dot1q 330
+  rewrite ingress tag pop 1 symmetric
+  bridge-domain 330
+ !
+!
+interface GigabitEthernet0/0/2
+ description Conexion a SW1.ROP.1
+ no ip address
+ negotiation auto
+ service instance 330 ethernet
+  encapsulation dot1q 330
+  rewrite ingress tag pop 1 symmetric
+  bridge-domain 330
+ !
+!
+interface GigabitEthernet0/0/3
+ no ip address
+ negotiation auto
+!
+interface GigabitEthernet0/0/4
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/0/5
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/0/6
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/0/7
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface TenGigabitEthernet0/0/8
+ description CONEXION WAN A HYLSA
+ mtu 1526
+ ip address 23.63.2.241 255.255.255.252
+ ip router isis CFE
+ carrier-delay msec 0
+ cdp enable
+ mpls ip
+ isis network point-to-point
+ isis metric 10 level-1
+ isis metric 10 level-2
+ service-policy output core-policy-CFE
+!
+interface GigabitEthernet0/1/0
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/1/1
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/1/2
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/1/3
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/1/4
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/1/5
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/1/6
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/1/7
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface TenGigabitEthernet0/1/8
+ description ENLACE 10G PUNTA C
+ ip address 22.63.3.1 255.255.255.252
+!
+interface GigabitEthernet0
+ vrf forwarding Mgmt-intf
+ no ip address
+ negotiation auto
+!
+interface BDI310
+ vrf forwarding 310
+ no ip address
+!
+interface BDI320
+ vrf forwarding 320
+ ip address 10.23.197.6 255.255.255.248
+!
+interface BDI330
+ vrf forwarding 330
+ ip address 10.23.196.62 255.255.255.192
+!
+interface BDI340
+ vrf forwarding 340
+ no ip address
+!
+interface BDI350
+ vrf forwarding 350
+ no ip address
+!
+interface BDI360
+ vrf forwarding 360
+ ip address 72.23.188.126 255.255.255.128
+!
+interface BDI430
+ vrf forwarding 430
+ ip address 10.123.239.14 255.255.255.240
+!
+interface BDI930
+ vrf forwarding 930
+ ip address 10.123.239.30 255.255.255.240
+!
+interface BDI960
+ vrf forwarding 960
+ ip address 10.123.232.94 255.255.255.224
+!
+router isis CFE
+ net 49.0023.0230.0200.0011.00
+ is-type level-2-only
+ metric-style wide
+ fast-flood 10
+ set-overload-bit on-startup 360
+ max-lsp-lifetime 65535
+ lsp-refresh-interval 65000
+ spf-interval 5 1 20
+ prc-interval 5 1 20
+ lsp-gen-interval 5 1 20
+ no hello padding point-to-point
+ log-adjacency-changes
+ passive-interface Loopback0
+ mpls ldp sync
+!
+router bgp 65001
+ bgp router-id 23.0.2.11
+ bgp log-neighbor-changes
+ bgp graceful-restart
+ no bgp default ipv4-unicast
+ neighbor 23.0.0.2 remote-as 65001
+ neighbor 23.0.0.2 update-source Loopback0
+ neighbor 23.0.0.180 remote-as 65001
+ neighbor 23.0.0.180 update-source Loopback0
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family vpnv4
+  neighbor 23.0.0.2 activate
+  neighbor 23.0.0.2 send-community both
+  neighbor 23.0.0.180 activate
+  neighbor 23.0.0.180 send-community both
+ exit-address-family
+ !
+ address-family ipv4 vrf 300
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 310
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 320
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 330
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 340
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 350
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 360
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 430
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 930
+  redistribute connected
+ exit-address-family
+ !
+ address-family ipv4 vrf 960
+  redistribute connected
+ exit-address-family
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+ip tftp source-interface GigabitEthernet0
+!
+logging alarm informational
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ password cfe_op
+ login
+ stopbits 1
+line vty 0 4
+ login local
+ transport input ssh
+!
+ntp source Loopback1
+!
+!
+
+!
+end
+
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show version
+Cisco IOS XE Software, Version 17.06.06
+Cisco IOS Software [Bengaluru], ASR900 Software (PPC_LINUX_IOSD-UNIVERSALK9_NPE-M), Version 17.6.6, RELEASE SOFTWARE (fc3)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2023 by Cisco Systems, Inc.
+Compiled Wed 27-Sep-23 16:24 by mcpre
+
+
+Cisco IOS-XE software, Copyright (c) 2005-2023 by cisco Systems, Inc.
+All rights reserved.  Certain components of Cisco IOS-XE software are
+licensed under the GNU General Public License ("GPL") Version 2.0.  The
+software code licensed under GPL Version 2.0 is free software that comes
+with ABSOLUTELY NO WARRANTY.  You can redistribute and/or modify such
+GPL code under the terms of GPL Version 2.0.  For more details, see the
+documentation or "License Notice" file accompanying the IOS-XE software,
+or the applicable URL provided on the flyer accompanying the IOS-XE
+software.
+
+
+ROM: 15.6(48r)
+
+R.RTRASNP.1 uptime is 3 days, 19 hours, 59 minutes
+Uptime for this control processor is 3 days, 20 hours, 6 minutes
+System returned to ROM by reload at 11:10:07 MEX Fri Feb 6 2026
+System image file is "bootflash:/asr900rsp2-universalk9_npe.17.06.06.SPA.bin"
+Last reload reason: Reload Command
+
+
+
+This product contains cryptographic features and is subject to United
+States and local country laws governing import, export, transfer and
+use. Delivery of Cisco cryptographic products does not imply
+third-party authority to import, export, distribute or use encryption.
+Importers, exporters, distributors and users are responsible for
+compliance with U.S. and local country laws. By using this product you
+agree to comply with applicable laws and regulations. If you are unable
+to comply with U.S. and local laws, return this product immediately.
+
+A summary of U.S. laws governing Cisco cryptographic products may be found at:
+http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
+
+If you require further assistance please contact us by sending email to
+export@cisco.com.
+
+License Level: metroaggrservices
+License Type: Permanent
+Next reload license Level: metroaggrservices
+
+
+Smart Licensing Status: Smart Licensing is DISABLED
+
+cisco ASR-903 (RSP2) processor (revision RSP2) with 866844K/6147K bytes of memory.
+Processor board ID FOX2417P5J4
+16 Gigabit Ethernet interfaces
+2 Ten Gigabit Ethernet interfaces
+32768K bytes of non-volatile configuration memory.
+3670016K bytes of physical memory.
+1231647K bytes of eMMC flash at bootflash:.
+
+Configuration register is 0x2102
+
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#shoe inB?
+% Unrecognized command
+R.RTRASNP.1#show inv
+R.RTRASNP.1#show inventory
+NAME: "Chassis", DESCR: "ASR 903 Series Router Chassis"
+PID: ASR-903           , VID: V01  , SN: FOX2417P5J4
+
+NAME: "IM subslot 0/0", DESCR: "8-port Gigabit Ethernet & 1-port Ten Gigabit Ethernet SFP Interface Module"
+PID: A900-IMA8S1Z      , VID: V01  , SN: FOC2047NN94
+
+NAME: "subslot 0/0 transceiver 0", DESCR: "GE SX"
+PID: GLC-SX-MMD          , VID: V01  , SN: FNS21170A44
+
+NAME: "subslot 0/0 transceiver 1", DESCR: "GE SX"
+PID: GLC-SX-MMD          , VID: V01  , SN: FNS21170A51
+
+NAME: "subslot 0/0 transceiver 2", DESCR: "GE SX"
+PID: GLC-SX-MMD          , VID: V01  , SN: OPM21160F72
+
+NAME: "subslot 0/0 transceiver 8", DESCR: "SFP+ 10GBASE-LR"
+PID: MA-SFP-10GB-LR      , VID: V03  , SN: FNS23140KSQ
+
+NAME: "IM subslot 0/1", DESCR: "8-port Gigabit Ethernet & 1-port Ten Gigabit Ethernet CU Interface Module"
+PID: A900-IMA8T1Z      , VID: V01  , SN: FOC1845P9RR
+
+NAME: "module R0", DESCR: "ASR 900 Route Switch Processor 2, Base Scale, 128Gbps"
+PID: A900-RSP2A-128    , VID: V01  , SN: FOC2420NY57
+
+NAME: "module R1", DESCR: "ASR 900 Route Switch Processor 2, Base Scale, 128Gbps"
+PID: A900-RSP2A-128    , VID: V01  , SN: FOC2420NY5J
+
+NAME: "Power Supply Module 0", DESCR: "ASR 900 1200W DC Power Supply"
+PID: A900-PWR1200-D    , VID: V01  , SN: LIT21373ACK
+
+NAME: "Power Supply Module 1", DESCR: "ASR 900 1200W DC Power Supply"
+PID: A900-PWR1200-D    , VID: V01  , SN: LIT213737RX
+
+NAME: "Fan Tray", DESCR: "ASR 903 FAN Tray"
+PID: A903-FAN          , VID: V02  , SN: FOC2414NAAM
+
+
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show pla
+R.RTRASNP.1#show platform
+Chassis type: ASR-903
+
+Slot      Type                State                 Insert time (ago)
+--------- ------------------- --------------------- -----------------
+ 0/0      A900-IMA8S1Z        ok                    3d19h
+ 0/1      A900-IMA8T1Z        ok                    3d19h
+R0        A900-RSP2A-128      ok, active            3d20h
+R1        A900-RSP2A-128      ok, standby           3d20h
+F0                            ok, active            3d20h
+F1                            ok, standby           3d20h
+P0        A900-PWR1200-D      ok                    3d20h
+P1        A900-PWR1200-D      ok                    3d20h
+P2        A903-FAN            ok                    3d20h
+
+Slot      CPLD Version        Firmware Version
+--------- ------------------- ---------------------------------------
+R0        21011511            15.6(48r)S
+R1        21011511            15.6(48r)S
+F0        21011511            15.6(48r)S
+F1        21011511            15.6(48r)S
+
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#ping vrf 330 10.23.1.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.23.1.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/4 ms
+R.RTRASNP.1#ping vrf 330 10.23.1.1 source bdi 330
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.23.1.1, timeout is 2 seconds:
+Packet sent with a source address of 10.23.196.62
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/3/4 ms
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#ping vrf 330 10.25.6.12 source bdi 330
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.25.6.12, timeout is 2 seconds:
+Packet sent with a source address of 10.23.196.62
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 28/30/32 ms
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#ping vrf 330 10.23.196.61 source bdi 330
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.23.196.61, timeout is 2 seconds:
+Packet sent with a source address of 10.23.196.62
+..!!!
+Success rate is 60 percent (3/5), round-trip min/avg/max = 1/3/4 ms
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#ping vrf 330 10.23.196.61 source bdi 330
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.23.196.61, timeout is 2 seconds:
+Packet sent with a source address of 10.23.196.62
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/3/8 ms
+R.RTRASNP.1#ping vrf 330 10.23.196.60 source bdi 330
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.23.196.60, timeout is 2 seconds:
+Packet sent with a source address of 10.23.196.62
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/3/12 ms
+R.RTRASNP.1#ping vrf 330 10.23.196.44 source bdi 330
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.23.196.44, timeout is 2 seconds:
+Packet sent with a source address of 10.23.196.62
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/4 ms
+R.RTRASNP.1#ping vrf 330 10.23.196.46 source bdi 330
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.23.196.46, timeout is 2 seconds:
+Packet sent with a source address of 10.23.196.62
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/4 ms
+R.RTRASNP.1#ping vrf 330 10.23.196.47 source bdi 330
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.23.196.47, timeout is 2 seconds:
+Packet sent with a source address of 10.23.196.62
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/4 ms
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show ip int b
+Interface              IP-Address      OK? Method Status                Protocol
+GigabitEthernet0/0/0   unassigned      YES NVRAM  up                    up
+GigabitEthernet0/0/1   unassigned      YES NVRAM  up                    up
+GigabitEthernet0/0/2   unassigned      YES NVRAM  up                    up
+GigabitEthernet0/0/3   unassigned      YES NVRAM  down                  down
+GigabitEthernet0/0/4   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/0/5   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/0/6   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/0/7   unassigned      YES NVRAM  administratively down down
+Te0/0/8                23.63.2.241     YES NVRAM  up                    up
+GigabitEthernet0/1/0   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/1/1   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/1/2   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/1/3   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/1/4   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/1/5   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/1/6   unassigned      YES NVRAM  administratively down down
+GigabitEthernet0/1/7   unassigned      YES NVRAM  administratively down down
+Te0/1/8                22.63.3.1       YES NVRAM  down                  down
+GigabitEthernet0       unassigned      YES NVRAM  down                  down
+BDI310                 unassigned      YES unset  down                  down
+BDI320                 10.23.197.6     YES manual up                    up
+BDI330                 10.23.196.62    YES manual up                    up
+BDI340                 unassigned      YES unset  down                  down
+BDI350                 unassigned      YES unset  down                  down
+BDI360                 72.23.188.126   YES manual up                    up
+BDI430                 10.123.239.14   YES manual up                    up
+BDI930                 10.123.239.30   YES manual up                    up
+BDI960                 10.123.232.94   YES manual up                    up
+Loopback0              23.0.2.11       YES NVRAM  up                    up
+Loopback1              23.1.2.11       YES manual up                    up
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show bgp vp
+R.RTRASNP.1#show bgp vpnv4 unicast all summary
+BGP router identifier 23.0.2.11, local AS number 65001
+BGP table version is 30148, main routing table version 30148
+19033 network entries using 2969148 bytes of memory
+28648 path entries using 2635616 bytes of memory
+68/68 BGP path/bestpath attribute entries using 13056 bytes of memory
+2911 BGP rrinfo entries using 105224 bytes of memory
+40 BGP extended community entries using 1200 bytes of memory
+0 BGP route-map cache entries using 0 bytes of memory
+0 BGP filter-list cache entries using 0 bytes of memory
+BGP using 5724244 total bytes of memory
+BGP activity 20245/1212 prefixes, 35036/6388 paths, scan interval 60 secs
+19033 networks peaked at 18:03:50 Feb 9 2026 MEX (13:09:03.337 ago)
+
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+23.0.0.2        4        65001  173075     961    30148    0    0 14:01:48     9483
+23.0.0.180      4        65001  260779    1107    30148    0    0 15:54:01     9497
+
+R.RTRASNP.1#+
+% Bad IP address or host name% Unknown command or computer name, or unable to find computer address
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, m - OMP
+       n - NAT, Ni - NAT inside, No - NAT outside, Nd - NAT DIA
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       H - NHRP, G - NHRP registered, g - NHRP registration summary
+       o - ODR, P - periodic downloaded static route, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+       & - replicated local route overrides by connected
+
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 9 subnets, 4 masks
+i L2     10.20.3.64/26
+           [115/570] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     10.21.1.0/24
+           [115/560] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     10.25.110.0/26
+           [115/380] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     10.30.45.192/26
+           [115/370] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     10.120.6.188/30
+           [115/750] via 23.63.2.242, 1d22h, TenGigabitEthernet0/0/8
+i L2     10.120.6.204/30
+           [115/750] via 23.63.2.242, 1d22h, TenGigabitEthernet0/0/8
+i L2     10.120.136.253/32
+           [115/650] via 23.63.2.242, 1d22h, TenGigabitEthernet0/0/8
+i L2     10.120.136.254/32
+           [115/750] via 23.63.2.242, 1d21h, TenGigabitEthernet0/0/8
+i L2     10.120.172.64/30
+           [115/650] via 23.63.2.242, 1d22h, TenGigabitEthernet0/0/8
+      20.0.0.0/8 is variably subnetted, 305 subnets, 3 masks
+i L2     20.0.0.0/24 [115/650] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.1/32 [115/900] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.3/32 [115/800] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.5/32
+           [115/1000] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.9/32
+           [115/1100] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.13/32
+           [115/800] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.15/32
+           [115/770] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.17/32
+           [115/570] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.22/32
+           [115/970] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.24/32
+           [115/1100] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.26/32
+           [115/770] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.28/32
+           [115/560] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.30/32
+           [115/670] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.34/32
+           [115/800] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.36/32
+           [115/800] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.38/32
+           [115/1000] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.42/32
+           [115/670] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.44/32
+           [115/700] via 23.63.2.242, 3d20h, TenGigabitEthernet0/0/8
+i L2     20.0.1.46/32
+
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show isis nei
+R.RTRASNP.1#show isis neighbors
+
+Tag CFE:
+System Id       Type Interface     IP Address      State Holdtime Circuit Id
+NE.HYM.RA01     L2   Te0/0/8       23.63.2.242     UP    28       3C
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show ip route vrf 330
+
+Routing Table: 330
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, m - OMP
+       n - NAT, Ni - NAT inside, No - NAT outside, Nd - NAT DIA
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       H - NHRP, G - NHRP registered, g - NHRP registration summary
+       o - ODR, P - periodic downloaded static route, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+       & - replicated local route overrides by connected
+
+Gateway of last resort is 23.0.1.254 to network 0.0.0.0
+
+B*    0.0.0.0/0 [200/0] via 23.0.1.254, 13:38:11
+      10.0.0.0/8 is variably subnetted, 2557 subnets, 16 masks
+B        10.17.0.0/16 [200/0] via 28.0.1.10, 13:38:13
+B        10.20.0.0/16 [200/0] via 25.0.1.80, 13:38:18
+B        10.20.3.0/26 [200/0] via 20.0.2.39, 13:38:11
+B        10.20.3.64/26 [200/0] via 20.0.2.39, 13:38:11
+B        10.20.3.128/26 [200/0] via 20.0.2.39, 13:38:12
+B        10.20.5.128/25 [200/0] via 20.0.2.35, 13:38:12
+B        10.20.20.192/26 [200/0] via 20.0.2.9, 13:38:12
+B        10.20.21.128/26 [200/0] via 20.0.2.5, 13:38:12
+B        10.20.23.128/27 [200/0] via 20.0.2.23, 13:38:12
+B        10.20.23.160/27 [200/0] via 20.0.2.23, 13:38:12
+B        10.20.28.0/28 [200/0] via 20.0.2.17, 13:38:12
+B        10.20.31.144/28 [200/0] via 20.0.2.61, 13:38:12
+B        10.20.31.160/28 [200/0] via 20.0.2.53, 13:38:12
+B        10.20.31.192/28 [200/0] via 20.0.2.89, 13:38:12
+B        10.20.39.144/28 [200/0] via 20.0.1.38, 13:38:12
+B        10.20.40.176/28 [200/0] via 20.0.1.109, 13:38:12
+B        10.20.42.176/28 [200/0] via 20.0.1.93, 13:38:12
+B        10.20.42.192/28 [200/0] via 20.0.1.55, 13:38:12
+B        10.20.42.208/28 [200/0] via 20.0.1.42, 13:38:12
+B        10.20.42.224/28 [200/0] via 20.0.1.52, 13:38:12
+B        10.20.42.240/28 [200/0] via 20.0.1.64, 13:38:12
+B        10.20.43.0/28 [200/0] via 20.0.1.9, 13:38:24
+B        10.20.43.16/28 [200/0] via 20.0.1.48, 13:38:12
+B        10.20.43.32/28 [200/0] via 20.0.1.38, 13:38:12
+B        10.20.43.48/28 [200/0] via 20.0.1.17, 13:38:12
+B        10.20.43.64/28 [200/0] via 20.0.1.30, 13:38:12
+B        10.20.43.80/28 [200/0] via 20.0.1.26, 13:38:12
+B        10.20.43.96/28 [200/0] via 20.0.1.102, 13:38:13
+B        10.20.43.112/28 [200/0] via 20.0.1.13, 13:38:13
+B        10.20.44.0/28 [200/0] via 20.0.1.87, 13:38:12
+B        10.20.44.16/28 [200/0] via 20.0.1.87, 13:38:12
+B        10.20.44.32/28 [200/0] via 20.0.1.22, 13:38:12
+B        10.20.44.48/28 [200/0] via 20.0.1.24, 13:38:12
+B        10.20.44.128/28 [200/0] via 20.0.1.91, 13:38:12
+B        10.20.44.144/28 [200/0] via 20.0.1.84, 13:38:12
+B        10.20.70.192/26 [200/0] via 26.0.0.4, 13:38:18
+B        10.20.71.32/27 [200/0] via 20.0.3.87, 13:38:12
+B        10.20.75.32/27 [200/0] via 20.0.2.61, 13:38:12
+B        10.20.75.192/27 [200/0] via 20.0.2.100, 05:44:53
+B        10.20.75.224/27 [200/0] via 20.0.2.5, 13:38:12
+B        10.20.76.128/27 [200/0] via 20.0.2.113, 13:38:12
+B        10.20.76.160/27 [200/0] via 20.0.2.113, 13:38:12
+B        10.20.76.192/27 [200/0] via 20.0.2.116, 13:38:12
+B        10.20.76.224/27 [200/0] via 20.0.2.116, 13:38:12
+B        10.20.77.0/27 [200/0] via 20.0.2.115, 13:38:12
+B        10.20.77.32/27 [200/0] via 20.0.2.115, 13:38:12
+B        10.20.77.80/28 [200/0] via 20.0.2.92, 13:38:12
+B        10.20.77.96/28 [200/0] via 20.0.2.92, 13:38:12
+B        10.20.77.128/27 [200/0] via 20.0.2.80, 13:38:12
+B        10.20.77.192/27 [200/0] via 20.0.2.118, 13:38:12
+
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show ip ro
+R.RTRASNP.1#show ip route vrf 930
+
+Routing Table: 930
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, m - OMP
+       n - NAT, Ni - NAT inside, No - NAT outside, Nd - NAT DIA
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       H - NHRP, G - NHRP registered, g - NHRP registration summary
+       o - ODR, P - periodic downloaded static route, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+       & - replicated local route overrides by connected
+
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 270 subnets, 6 masks
+B        10.112.192.32/29 [200/0] via 25.0.1.255, 13:21:56
+B        10.112.192.40/29 [200/0] via 25.0.1.48, 13:21:56
+B        10.112.192.48/29 [200/0] via 25.0.1.48, 13:21:56
+B        10.112.192.56/29 [200/0] via 25.0.1.57, 13:21:56
+B        10.112.192.64/29 [200/0] via 25.0.1.65, 13:21:56
+B        10.112.192.72/29 [200/0] via 25.0.1.75, 13:21:57
+B        10.112.192.80/29 [200/0] via 25.0.0.67, 13:21:57
+B        10.112.192.88/29 [200/0] via 25.0.1.253, 13:21:57
+B        10.112.192.96/29 [200/0] via 25.0.0.57, 13:21:57
+B        10.112.192.112/29 [200/0] via 25.0.0.61, 13:21:57
+B        10.112.192.120/29 [200/0] via 25.0.0.147, 13:21:57
+B        10.112.192.128/29 [200/0] via 25.0.0.171, 13:21:57
+B        10.112.192.136/29 [200/0] via 25.0.1.42, 13:21:57
+B        10.112.192.152/29 [200/0] via 25.0.1.44, 13:21:57
+B        10.112.192.168/29 [200/0] via 25.0.1.75, 13:21:57
+B        10.112.192.176/29 [200/0] via 25.0.2.0, 13:21:57
+B        10.112.192.184/29 [200/0] via 25.0.0.29, 13:21:57
+B        10.112.192.224/29 [200/0] via 25.0.1.61, 13:21:57
+B        10.112.192.240/29 [200/0] via 25.0.0.61, 13:21:57
+B        10.112.192.248/29 [200/0] via 25.0.0.77, 13:21:57
+B        10.112.193.0/29 [200/0] via 26.0.0.180, 13:21:57
+B        10.112.193.8/29 [200/0] via 26.0.0.150, 13:21:57
+B        10.112.193.24/29 [200/0] via 26.0.0.176, 13:21:57
+B        10.112.193.32/29 [200/0] via 26.0.0.216, 13:21:57
+B        10.112.193.56/29 [200/0] via 26.0.0.191, 13:21:57
+B        10.112.193.64/29 [200/0] via 26.0.0.120, 13:21:57
+B        10.112.193.88/29 [200/0] via 26.0.0.96, 13:21:57
+B        10.112.193.96/29 [200/0] via 26.0.0.179, 13:21:57
+B        10.112.193.104/29 [200/0] via 26.0.0.176, 13:22:00
+B        10.112.193.112/29 [200/0] via 26.0.0.170, 13:22:00
+B        10.112.193.128/29 [200/0] via 26.0.0.178, 13:22:00
+B        10.112.193.136/29 [200/0] via 26.0.0.183, 13:22:00
+B        10.112.193.144/29 [200/0] via 26.0.0.170, 13:22:00
+B        10.112.193.160/29 [200/0] via 26.0.0.101, 13:22:00
+B        10.112.193.168/29 [200/0] via 26.0.0.104, 13:22:00
+B        10.112.193.176/29 [200/0] via 26.0.0.93, 13:22:00
+B        10.112.193.184/29 [200/0] via 26.0.0.100, 13:22:00
+B        10.112.193.200/29 [200/0] via 26.0.0.202, 13:22:00
+B        10.112.193.208/29 [200/0] via 26.0.0.202, 13:22:00
+B        10.112.193.216/29 [200/0] via 26.0.0.206, 13:22:00
+B        10.112.193.232/29 [200/0] via 26.0.0.199, 13:22:00
+B        10.112.193.248/29 [200/0] via 26.0.0.80, 13:22:00
+B        10.112.198.32/29 [200/0] via 27.0.0.253, 13:22:00
+B        10.112.199.8/29 [200/0] via 26.0.0.133, 13:22:00
+B        10.112.199.16/29 [200/0] via 26.0.0.119, 13:22:00
+B        10.112.199.32/29 [200/0] via 26.0.0.144, 13:22:00
+B        10.112.199.40/29 [200/0] via 26.0.0.174, 13:22:00
+B        10.112.199.48/29 [200/0] via 26.0.0.175, 13:22:00
+B        10.112.199.56/29 [200/0] via 26.0.0.191, 13:22:00
+B        10.112.199.64/29 [200/0] via 26.0.0.185, 13:22:00
+B        10.112.199.72/29 [200/0] via 26.0.0.169, 13:22:00
+
+R.RTRASNP.1#4
+% Bad IP address or host name% Unknown command or computer name, or unable to find computer address
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show ip rout
+R.RTRASNP.1#show ip route vrf 960
+
+Routing Table: 960
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, m - OMP
+       n - NAT, Ni - NAT inside, No - NAT outside, Nd - NAT DIA
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       H - NHRP, G - NHRP registered, g - NHRP registration summary
+       o - ODR, P - periodic downloaded static route, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+       & - replicated local route overrides by connected
+
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 426 subnets, 6 masks
+B        10.72.111.127/32 [200/0] via 25.0.0.81, 13:19:50
+B        10.112.12.102/32 [200/0] via 25.0.0.81, 13:19:50
+B        10.112.12.103/32 [200/0] via 25.0.0.81, 13:19:50
+B        10.112.12.202/32 [200/0] via 25.0.0.81, 13:19:50
+B        10.112.82.8/30 [200/0] via 25.0.0.37, 13:19:50
+B        10.112.82.24/29 [200/0] via 25.0.0.81, 13:19:51
+B        10.112.83.24/30 [200/0] via 26.0.0.176, 13:19:50
+B        10.112.181.16/29 [200/0] via 27.0.0.161, 13:19:50
+B        10.112.181.24/29 [200/0] via 27.0.0.112, 13:19:50
+B        10.112.181.32/29 [200/0] via 27.0.0.86, 13:19:50
+B        10.112.181.40/29 [200/0] via 27.0.0.104, 13:19:50
+B        10.112.181.48/29 [200/0] via 27.0.0.253, 13:19:50
+B        10.112.181.56/29 [200/0] via 27.0.0.251, 13:19:50
+B        10.112.181.64/29 [200/0] via 27.0.0.184, 13:19:50
+B        10.112.181.72/29 [200/0] via 27.0.0.67, 13:19:50
+B        10.112.181.80/29 [200/0] via 27.0.0.209, 13:19:50
+B        10.112.181.88/29 [200/0] via 27.0.0.167, 13:19:50
+B        10.112.181.96/29 [200/0] via 27.0.0.30, 13:19:50
+B        10.112.181.120/29 [200/0] via 27.0.0.4, 13:19:50
+B        10.112.181.128/29 [200/0] via 27.0.0.199, 13:19:50
+B        10.112.181.136/29 [200/0] via 27.0.0.191, 13:19:50
+B        10.112.181.160/29 [200/0] via 27.0.0.254, 13:19:50
+B        10.112.181.176/29 [200/0] via 27.0.0.34, 13:19:50
+B        10.112.181.184/29 [200/0] via 27.0.0.72, 13:19:50
+B        10.112.181.192/29 [200/0] via 27.0.0.36, 13:19:50
+B        10.112.181.200/29 [200/0] via 27.0.0.213, 13:19:50
+B        10.112.181.208/28 [200/0] via 27.0.0.253, 13:19:50
+B        10.112.181.224/28 [200/0] via 27.0.0.86, 13:19:50
+B        10.112.181.240/29 [200/0] via 27.0.0.107, 13:19:51
+B        10.112.181.248/29 [200/0] via 27.0.0.95, 13:19:51
+B        10.112.182.32/29 [200/0] via 25.0.1.255, 13:19:52
+B        10.112.182.40/29 [200/0] via 25.0.1.48, 13:19:52
+B        10.112.182.48/29 [200/0] via 25.0.1.48, 13:19:52
+B        10.112.182.56/29 [200/0] via 25.0.0.17, 13:19:52
+B        10.112.182.64/29 [200/0] via 25.0.0.77, 13:19:52
+B        10.112.182.72/29 [200/0] via 25.0.0.66, 13:19:52
+B        10.112.182.80/29 [200/0] via 25.0.0.67, 13:19:52
+B        10.112.182.88/29 [200/0] via 25.0.1.253, 13:19:52
+B        10.112.182.96/29 [200/0] via 25.0.0.57, 13:19:52
+B        10.112.182.104/29 [200/0] via 25.0.0.63, 13:19:52
+B        10.112.182.112/29 [200/0] via 25.0.0.61, 13:19:52
+B        10.112.182.120/29 [200/0] via 25.0.0.147, 13:19:52
+B        10.112.182.128/29 [200/0] via 25.0.0.171, 13:19:52
+B        10.112.182.136/29 [200/0] via 25.0.1.42, 13:19:52
+B        10.112.182.144/29 [200/0] via 25.0.1.45, 13:19:52
+B        10.112.182.152/29 [200/0] via 25.0.1.44, 13:19:52
+B        10.112.182.160/29 [200/0] via 25.0.1.74, 13:19:52
+B        10.112.182.168/29 [200/0] via 25.0.1.75, 13:19:52
+B        10.112.182.176/29 [200/0] via 25.0.2.0, 13:19:52
+B        10.112.182.184/29 [200/0] via 25.0.0.29, 13:19:52
+B        10.112.182.200/29 [200/0] via 25.0.0.30, 13:19:52
+
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#
+R.RTRASNP.1#show envir
+R.RTRASNP.1#show environment ?
+  all       Show list of sensors
+  counters  Show operational counters
+  history   Show sensor state change history
+  location  Show sensors by location
+  sensor    Show sensor summary
+  summary   Show a summary of all environment monitoring sensors
+  table     Show sensor state table
+  |         Output modifiers
+  <cr>      <cr>
+
+R.RTRASNP.1#show environment summ
+R.RTRASNP.1#show environment summary
+
+Number of Critical alarms:  0
+Number of Major alarms:     0
+Number of Minor alarms:     0
+
+ Slot        Sensor          Current State   Reading        Threshold(Minor,Major,Critical,Shutdown)
+ ----------  --------------  --------------- ------------   ---------------------------------------
+ P0          PEM Iout        Normal          7     A            na
+ P0          PEM Vout        Normal          12    V DC         na
+ P0          PEM Vin         Normal          51    V DC         na
+ P0          Temp: Temp 1    Normal          37    Celsius      (110,115,120,125)(Celsius)
+ P0          Temp: Temp 2    Normal          48    Celsius      (110,115,120,125)(Celsius)
+ P1          PEM Iout        Normal          7     A            na
+ P1          PEM Vout        Normal          12    V DC         na
+ P1          PEM Vin         Normal          51    V DC         na
+ P1          Temp: Temp 1    Normal          31    Celsius      (110,115,120,125)(Celsius)
+ P1          Temp: Temp 2    Normal          38    Celsius      (110,115,120,125)(Celsius)
+ P2          Temp: FC PWM1   Fan Speed 45%   21    Celsius      (-10,26 ,46 )(Celsius)
+ R0          VADM : VX1      Normal          1010  mV           na
+ R0          VADM : VX2      Normal          1067  mV           na
+ R0          VADM : VX3      Normal          997   mV           na
+ R0          VADM : VX4      Normal          1548  mV           na
+ R0          VADM : VP1      Normal          4996  mV           na
+ R0          VADM : VP2      Normal          3290  mV           na
+ R0          VADM : VP3      Normal          1007  mV           na
+ R0          VADM : VP4      Normal          1000  mV           na
+ R0          VADM : VH       Normal          12118 mV           na
+ R0          VADM : AUX1     Normal          1010  mV           na
+ R0          VADM : AUX2     Normal          678   mV           na
+ R0          Temp: CYLON0    Normal          40    Celsius      (90 ,95 ,100,110)(Celsius)
+ R0          Temp: Inlet     Normal          26    Celsius      (70 ,75 ,80 ,100)(Celsius)
+ R0          Temp: CYLON1    Normal          45    Celsius      (90 ,95 ,100,110)(Celsius)
+ R0          Temp: Outlet    Normal          37    Celsius      (80 ,85 ,90 ,100)(Celsius)
+ R1          VADM : VX1      Normal          1010  mV           na
+ R1          VADM : VX2      Normal          1066  mV           na
+ R1          VADM : VX3      Normal          997   mV           na
+ R1          VADM : VX4      Normal          1544  mV           na
+ R1          VADM : VP1      Normal          5022  mV           na
+ R1          VADM : VP2      Normal          3292  mV           na
+ R1          VADM : VP3      Normal          1005  mV           na
+ R1          VADM : VP4      Normal          999   mV           na
+ R1          VADM : VH       Normal          12118 mV           na
+ R1          VADM : AUX1     Normal          1004  mV           na
+ R1          VADM : AUX2     Normal          701   mV           na
+ R1          Temp: CYLON0    Normal          44    Celsius      (90 ,95 ,100,110)(Celsius)
+ R1          Temp: Inlet     Normal          26    Celsius      (70 ,75 ,80 ,100)(Celsius)
+ R1          Temp: CYLON1    Normal          47    Celsius      (90 ,95 ,100,110)(Celsius)
+ R1          Temp: Outlet    Normal          39    Celsius      (80 ,85 ,90 ,100)(Celsius)
+
+
+R.RTRASNP.1#
