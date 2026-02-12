@@ -1,0 +1,76 @@
+(Cisco Controller) >show ap summary
+
+Number of APs.................................... 1
+
+Global AP User Name.............................. cfe_op
+Global AP Dot1x User Name........................ Not Configured
+
+* prefix indicates Cisco Internal AP
+
+AP Name                         Slots  AP Model              Ethernet MAC       Location              Country     IP Address       Clients  DSE Location
+------------------------------  -----  --------------------  -----------------  --------------------  ----------  ---------------  -------  --------------
+*AP-INT                          2      AIR-AP2802I-B-K9       48:8b:0a:0e:4b:26  default location      MX          10.23.196.49     1        [0 ,0 ,0 ]
+
+(Cisco Controller) >show sysinfo
+
+Manufacturer's Name.............................. Cisco Systems Inc.
+Product Name..................................... Cisco Controller
+Build Info....................................... Engineering Special
+Product Version.................................. 8.5.140.0
+
+System Name...................................... AP-EXT
+System Location..................................
+System Contact...................................
+System ObjectID.................................. 1.3.6.1.4.1.9.1.2370
+IP Address....................................... 10.23.196.32
+Last Reset....................................... 0: unknown
+
+System Up Time................................... 0 days 0 hrs 44 mins 58 secs
+System Timezone Location......................... (GMT -7:00) Mountain Time (US and Canada)
+System Stats Realtime Interval................... 5
+System Stats Normal Interval..................... 180
+
+Configured Country............................... MX  - Mexico
+
+State of 802.11b Network......................... Enabled
+State of 802.11a Network......................... Enabled
+
+--More-- or (q)uit
+Number of WLANs.................................. 1
+Number of Active Clients......................... 1
+
+OUI Classification Failure Count................. 1
+
+Memory Current Usage............................. 65
+Memory Average Usage............................. 65
+CPU Current Usage................................ 2
+CPU Average Usage................................ 2
+
+Flash Type....................................... Compact Flash Card
+Flash Size....................................... 1073741824
+
+Burned-in MAC Address............................ 48:8B:0A:0E:4B:20
+Maximum number of APs supported.................. 100
+System Nas-Id....................................
+WLC MIC Certificate Types........................ SHA1/SHA2
+
+(Cisco Controller) >
+(Cisco Controller) >show interface summary
+
+
+ Number of Interfaces.......................... 2
+
+Interface Name                   Port Vlan Id  IP Address      Type    Ap Mgr Guest
+-------------------------------- ---- -------- --------------- ------- ------ -----
+management                       1    untagged 10.23.196.32    Static  Yes    No
+virtual                          N/A  N/A      192.0.2.1       Static  No     No
+
+(Cisco Controller) >
+(Cisco Controller) >show inve
+
+Burned-in MAC Address............................ 48:8B:0A:0E:4B:20
+Maximum number of APs supported.................. 100
+NAME: "Mobility Express"    , DESCR: "Cisco Aironet 2800 Series Mobility Express"
+PID: AIR-AP2802I-B-K9,  VID: V05,  SN: FJC26051AEJ
+
+(Cisco Controller) >
